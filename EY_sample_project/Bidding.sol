@@ -16,7 +16,7 @@ contract Bidding {
 //Indexed Mapping to keep a track and easy retrieval of bids. #Key# here is unique bidderAddress of party B and C
     mapping(address => bid) bids;
 
-    event registerItemEvent(string _actionPerformed, string _itemName, uint _itemBasePrice, uin256 _timeOfTx);
+    event registerItemEvent(string _actionPerformed, string _itemName, uint _itemBasePrice, uint256 _timeOfTx);
 
     modifier onlyNodeA() {
         if (msg.sender != admin)
