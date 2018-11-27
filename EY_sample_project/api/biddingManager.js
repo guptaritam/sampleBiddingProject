@@ -26,15 +26,11 @@ var biddingManagerContractABI = [
 				"type": "string"
 			},
 			{
-				"name": "_biddingAddress",
-				"type": "address"
-			},
-			{
-				"name": "_bidAmount",
+				"name": "_itemBasePrice",
 				"type": "uint256"
 			}
 		],
-		"name": "placeBid",
+		"name": "registerItem",
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
@@ -44,19 +40,19 @@ var biddingManagerContractABI = [
 		"constant": false,
 		"inputs": [
 			{
-				"name": "_address",
-				"type": "address"
-			},
-			{
 				"name": "_itemName",
 				"type": "string"
 			},
 			{
-				"name": "_itemBasePrice",
+				"name": "_bidderAddress",
+				"type": "address"
+			},
+			{
+				"name": "_bidAmount",
 				"type": "uint256"
 			}
 		],
-		"name": "registerItem",
+		"name": "placeBid",
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
@@ -104,6 +100,11 @@ var biddingManagerContractABI = [
 				"indexed": false,
 				"name": "_itemBasePrice",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_timeOfTx",
+				"type": "uint256"
 			}
 		],
 		"name": "registerItemEvent",
@@ -111,6 +112,7 @@ var biddingManagerContractABI = [
 	}
 ];
 
+//The APIs below will sendTransaction()/call() contract functions using party A,B,C account keys. We can either promatically or manually unlock the key asking for the passphrase to make sure of party's identity
 //now contract initiation
 var biddingManagerContract = web3.eth.contract(biddingManagerContractABI).at(biddingManagerContractAddress);
 
@@ -127,9 +129,9 @@ biddingManagerApiRoutes.post('/registerItem', function(req, res) {
     var itemName = req.body._itemName;
     var itemBasePrice = req.body._itemBasePrice;
 
-    biddingManagerContract.registerItem.sendTransaction(address, itemName, itemBasePrice, {
-        from: web3.eth.defaultAccount,
-        gas: 400000
+    biddingManagerContract.registerItem.sendTransaction(itemName, itemBasePrice, {
+        from: address,
+        gas: 400000 //hardcoded for simplicity. This value can also be dynamic based on averaging out last 2 blocks gas used
     }, function(err, result) {
         console.log(result);
         if (!err) {
@@ -143,7 +145,7 @@ biddingManagerApiRoutes.post('/registerItem', function(req, res) {
 
 
 biddingManagerApiRoutes.post('/viewItem', function(req, res) {
-
+		
     var itemName = req.body._itemName;
 
     biddingManagerContract.viewItem.call(itemName, function(err, result) {
@@ -164,11 +166,11 @@ biddingManagerApiRoutes.post('/viewItem', function(req, res) {
 biddingManagerApiRoutes.post('/placeBid', function(req, res) {
 
     var itemName = req.body._itemName;
-    var biddingAddress = req.body._biddingAddress;
+    var bidderAddress = req.body._bidderAddress;
     var bidAmount = req.body._bidAmount;
 
-    biddingManagerContract.placeBid.sendTransaction(itemName, biddingAddress, bidAmount, {
-        from: biddingAddress,
+    biddingManagerContract.placeBid.sendTransaction(itemName, bidderAddress, bidAmount, {
+        from: bidderAddress,
         gas: 400000
     }, function(err, result) {
         console.log(result);
